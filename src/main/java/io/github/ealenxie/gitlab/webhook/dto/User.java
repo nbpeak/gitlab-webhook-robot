@@ -10,10 +10,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class User {
-    private Long id;
+//    private Long id;
     private String name;
     private String username;
     @JsonProperty("avatar_url")
     private String avatarUrl;
-    private String email;
+//    private String email;
 }

@@ -14,6 +14,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created by EalenXie on 2022/2/11 16:42
@@ -22,13 +25,13 @@ import java.util.List;
 @ConditionalOnProperty(prefix = WebHookConfig.PREFIX, value = "way", havingValue = "wechat")
 public class WeChatMessageSender implements MessageSender<MarkDownMsg, String> {
     private final WeChatClient weChatClient;
-    private final String key;
     private final GitlabHandler gitlabHandler;
+    private final WebHookConfig webHookConfig;
 
     public WeChatMessageSender(WebHookConfig webHookConfig, RestTemplate httpClientRestTemplate, @Autowired(required = false) GitlabHandler gitlabHandler) {
         this.weChatClient = new WeChatClient(httpClientRestTemplate);
-        this.key = webHookConfig.getWechat().getKey();
         this.gitlabHandler = gitlabHandler;
+        this.webHookConfig = webHookConfig;
     }
 
 
@@ -38,21 +41,42 @@ public class WeChatMessageSender implements MessageSender<MarkDownMsg, String> {
         StringBuilder sb = new StringBuilder();
         if (!markDownMsg.notifier().isEmpty()) {
             List<String> atMobiles = new ArrayList<>();
-            if (gitlabHandler != null) {
-                List<String> notifier = markDownMsg.notifier();
-                for (String s : notifier) {
-                    String skype = gitlabHandler.getUserSkype(Long.parseLong(s));
-                    if (skype != null) {
-                        atMobiles.add(skype);
-                    }
-                }
-            }
+//            if (gitlabHandler != null) {
+//                List<String> notifier = markDownMsg.notifier();
+//                for (String s : notifier) {
+//                    String skype = gitlabHandler.getUserSkype(Long.parseLong(s));
+//                    if (skype != null) {
+//                        atMobiles.add(skype);
+//                    }
+//                }
+//            }
+            atMobiles.addAll(markDownMsg.notifier());
             markdown.setMentionedMobileList(atMobiles.toArray(new String[0]));
         }
         sb.append(markDownMsg.getMarkdown());
         markdown.setContent(sb.toString());
         MarkdownMessage actionCardMessage = new MarkdownMessage(markdown);
-        return weChatClient.sendMessage(actionCardMessage, key);
+        return weChatClient.sendMessage(actionCardMessage, getKey(markDownMsg.getMessageType()));
+    }
+
+    private String getKey(MessageTypeEnum messageType) {
+        Supplier<String> keyFunc = () -> {
+            if (messageType == null) {
+                return null;
+            }
+
+            switch (messageType) {
+                case COMMENT:
+                    return webHookConfig.getWechat().getCommentKey();
+                case MERGE_REQUEST_STATUS_CHANGED:
+                    return webHookConfig.getWechat().getMergeRequestStatusChangedKey();
+                default:
+                    return webHookConfig.getWechat().getKey();
+            }
+        };
+
+        return Optional.ofNullable(keyFunc.get())
+                .orElse(webHookConfig.getWechat().getKey());
     }
 
 }

@@ -113,6 +113,8 @@ public class WebHookConfig {
 
     public static class WeChatConfig {
         private String key;
+        private String commentKey;
+        private String mergeRequestStatusChangedKey;
 
         public String getKey() {
             return key;
@@ -120,6 +122,22 @@ public class WebHookConfig {
 
         public void setKey(String key) {
             this.key = key;
+        }
+
+        public String getCommentKey() {
+            return commentKey;
+        }
+
+        public void setCommentKey(String commentKey) {
+            this.commentKey = commentKey;
+        }
+
+        public String getMergeRequestStatusChangedKey() {
+            return mergeRequestStatusChangedKey;
+        }
+
+        public void setMergeRequestStatusChangedKey(String mergeRequestStatusChangedKey) {
+            this.mergeRequestStatusChangedKey = mergeRequestStatusChangedKey;
         }
     }
 

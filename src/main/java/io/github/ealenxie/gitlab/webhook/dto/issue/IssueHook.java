@@ -115,7 +115,8 @@ public class IssueHook implements MarkDownMsg {
 
     @Override
     public List<String> notifier() {
-        return Collections.singletonList(String.valueOf(user.getId()));
+//        return Collections.singletonList(String.valueOf(user.getId()));
+        return Collections.singletonList(String.valueOf(user.getName()));
     }
 }
 

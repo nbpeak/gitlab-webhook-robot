@@ -2,6 +2,7 @@ package io.github.ealenxie.gitlab.webhook.dto.mergerequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.ealenxie.gitlab.webhook.dto.*;
+import io.github.ealenxie.gitlab.webhook.sender.MessageTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,6 +27,7 @@ public class MergeRequestHook implements MarkDownMsg {
     private String[] labels;
     private Changes changes;
     private Repository repository;
+    private MessageTypeEnum messageType;
 
     @Override
     public String getTitle() {
@@ -34,7 +36,8 @@ public class MergeRequestHook implements MarkDownMsg {
 
     @Override
     public List<String> notifier() {
-        return Collections.singletonList(String.valueOf(user.getId()));
+//        return Collections.singletonList(String.valueOf(user.getId()));
+        return Collections.singletonList(String.valueOf(user.getName()));
     }
 
     @Override
@@ -43,25 +46,34 @@ public class MergeRequestHook implements MarkDownMsg {
         String p = String.format("[[%s]](%s)", project.getName(), project.getWebUrl());
         String sources = String.format("[%s](%s/-/tree/%s)", objectAttributes.getSourceBranch(), project.getWebUrl(), objectAttributes.getSourceBranch());
         String targets = String.format("[%s](%s/-/tree/%s)", objectAttributes.getTargetBranch(), project.getWebUrl(), objectAttributes.getTargetBranch());
-        String u = String.format("[%s](%s)", user.getUsername(), UserUtils.getUserHomePage(project.getWebUrl(), user.getUsername()));
         String merge = String.format(" [#%s](%s)(%s)", objectAttributes.getId(), objectAttributes.getUrl(), objectAttributes.getTitle());
-        sb.append(String.format("<font color='#000000'>%s %s %s %s %s </font>%n%n", p, u, objectAttributes.getState(), objectKind, merge));
+//        sb.append(String.format("<font color='#000000'>%s %s %s </font>%n%n", p, u, merge));
         switch (objectAttributes.getState()) {
             case "opened":
-                sb.append(String.format("%s %s  wants to merge %s ➔➔ %s %n", new Emoji(" \uD83D\uDE00 "), user.getUsername(), sources, targets));
+                sb.append(String.format("%s 在 %s 项目中发起合并请求： %s ➔➔ %s %s %n", user.getName(), p, sources, targets, merge));
                 String c = String.format(" %s - %s%n", objectAttributes.getLastCommit().getAuthor().getName(), objectAttributes.getLastCommit().getMessage());
-                sb.append(String.format(">[%s](%s)%s", objectAttributes.getLastCommit().getId().substring(0, 8), objectAttributes.getLastCommit().getUrl(), c));
+                sb.append(String.format(">[%s](%s)%s%n", objectAttributes.getLastCommit().getId().substring(0, 8), objectAttributes.getLastCommit().getUrl(), c));
                 break;
             case "merged":
-                sb.append(String.format(" %s %s has completed the merge %s➔➔%s%s%n", new Emoji(" \uD83D\uDE00 "), user.getUsername(), sources, targets, new Emoji("✔️")));
+                sb.append(String.format("%s 同意了 %s %s➔➔%s 的合并请求 %s %s%n", user.getName(), p, sources, targets, merge, new Emoji("✔️")));
                 break;
             case "closed":
-                sb.append(String.format(" %s %s has closed the merge %s➔➔%s%s %n", new Emoji(" \uD83D\uDE36 "), user.getUsername(), sources, targets, new Emoji("\uD83D\uDEAB")));
+                sb.append(String.format("%s 驳回了 %s %s➔➔%s 的合并请求 %s %s%n", user.getName(), p, sources, targets, merge, new Emoji("\uD83D\uDEAB")));
                 break;
             default:
                 break;
         }
+        sb.append(String.format("%s%n", objectAttributes.getUrl()));
         return sb.toString();
+    }
+
+    public void setObjectAttributes(ObjectAttributes objectAttributes) {
+        this.objectAttributes = objectAttributes;
+        if ("merged".equals(this.getObjectAttributes().getState()) || "closed".equals(this.getObjectAttributes().getState())) {
+            this.messageType = MessageTypeEnum.MERGE_REQUEST_STATUS_CHANGED;
+        } else if ("opened".equals(this.getObjectAttributes().getState())) {
+            this.messageType = MessageTypeEnum.DEFAULT;
+        }
     }
 
     @Setter

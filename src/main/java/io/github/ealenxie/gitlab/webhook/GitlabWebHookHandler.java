@@ -13,6 +13,7 @@ import io.github.ealenxie.gitlab.webhook.dto.push.PushHook;
 import io.github.ealenxie.gitlab.webhook.dto.release.ReleaseHook;
 import io.github.ealenxie.gitlab.webhook.dto.tag.TagHook;
 import io.github.ealenxie.gitlab.webhook.sender.MessageSender;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 /**
  * Created by EalenXie on 2022/2/11 16:20
  */
+@Slf4j
 @Service
 public class GitlabWebHookHandler implements WebHookHandler<JsonNode, ResponseEntity<String>> {
 
@@ -52,6 +54,8 @@ public class GitlabWebHookHandler implements WebHookHandler<JsonNode, ResponseEn
      */
     @Override
     public ResponseEntity<String> handle(@NonNull JsonNode body, @NonNull String event) {
+        log.info("发生事件：{}", event);
+        log.info("事件消息：{}", body);
         switch (event) {
             case PUSH_HOOK:
                 PushHook pushHook = objectMapper.convertValue(body, PushHook.class);

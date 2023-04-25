@@ -1,5 +1,7 @@
 package io.github.ealenxie.gitlab.webhook.dto;
 
+import io.github.ealenxie.gitlab.webhook.sender.MessageTypeEnum;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -8,6 +10,10 @@ import java.util.List;
  * 生成markdown消息
  */
 public interface MarkDownMsg {
+
+    default MessageTypeEnum getMessageType() {
+        return MessageTypeEnum.DEFAULT;
+    }
 
     /**
      * 消息标题

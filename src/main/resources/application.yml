@@ -1,20 +1,22 @@
 server:
-  port: 8787
+  port: 18888
 
 webhook:
   enable-emoji: true
-  way: ding
-  ding:
-    access-token: 93a93799cde9xxxxxx655ae0d4eb9872883c
-    sign-key: SECcd68c6b173cca046231c48739c6141a891c9
+  way: wechat
+#  ding:
+#    access-token: 93a93799cde9xxxxxx655ae0d4eb9872883c
+#    sign-key: SECcd68c6b173cca046231c48739c6141a891c9
   wechat:
-    key: 11910fa
-  feishu:
-    url: https://open.feishu.cn/open-apis/bot/v2/hook/4ad2ff7d-78e4-4ef0-84be-ee6
-    signKey:
+    key: aaab4b16-435e-4d1d-8456-7ce72b9c0c62
+    commentKey: 4345909b-8dd0-4f79-beb5-325e29867394
+    mergeRequestStatusChangedKey: 4345909b-8dd0-4f79-beb5-325e29867394
+#  feishu:
+#    url: https://open.feishu.cn/open-apis/bot/v2/hook/4ad2ff7d-78e4-4ef0-84be-ee6
+#    signKey:
 gitlab:
   enable: true
-  host: http://8.142
+  host: http://localhost:7000
   private-token: TJ
 spring:
   application:

@@ -55,10 +55,11 @@ public class MergeRequestHook implements MarkDownMsg {
                 sb.append(String.format(">[%s](%s)%s%n", objectAttributes.getLastCommit().getId().substring(0, 8), objectAttributes.getLastCommit().getUrl(), c));
                 break;
             case "merged":
-                sb.append(String.format("%s 同意了 %s %s➔➔%s 的合并请求 %s %s%n", user.getName(), p, sources, targets, merge, new Emoji("✔️")));
-                break;
+//                sb.append(String.format("%s %s 同意了 %s %s➔➔%s 的合并请求 %s %n", new Emoji("✔️"), user.getName(), p, sources, targets, merge));
+                // 已合并的消息不发送
+                return "";
             case "closed":
-                sb.append(String.format("%s 驳回了 %s %s➔➔%s 的合并请求 %s %s%n", user.getName(), p, sources, targets, merge, new Emoji("\uD83D\uDEAB")));
+                sb.append(String.format("%s %s 驳回了 %s %s➔➔%s 的合并请求 %s %n", new Emoji("\uD83D\uDEAB"), user.getName(), p, sources, targets, merge));
                 break;
             default:
                 break;

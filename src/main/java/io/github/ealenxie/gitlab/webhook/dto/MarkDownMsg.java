@@ -33,4 +33,6 @@ public interface MarkDownMsg {
      * 生成markdown信息
      */
     String getMarkdown();
+
+    Project getProject();
 }

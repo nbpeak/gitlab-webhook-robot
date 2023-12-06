@@ -52,6 +52,7 @@ public class JobHook implements MarkDownMsg {
     private User user;
     private Commit commit;
     private Repository repository;
+    private Project project;
 
     @Override
     public String getTitle() {

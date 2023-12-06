@@ -54,8 +54,7 @@ public class GitlabWebHookHandler implements WebHookHandler<JsonNode, ResponseEn
      */
     @Override
     public ResponseEntity<String> handle(@NonNull JsonNode body, @NonNull String event) {
-        log.info("发生事件：{}", event);
-        log.info("事件消息：{}", body);
+        log.info("发生事件：{}，事件消息：{}", event, body);
         switch (event) {
             case PUSH_HOOK:
                 PushHook pushHook = objectMapper.convertValue(body, PushHook.class);

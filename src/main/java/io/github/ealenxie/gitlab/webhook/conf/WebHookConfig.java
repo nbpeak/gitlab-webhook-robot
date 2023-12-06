@@ -2,6 +2,7 @@ package io.github.ealenxie.gitlab.webhook.conf;
 
 import io.github.ealenxie.gitlab.webhook.WebHookWay;
 import io.github.ealenxie.gitlab.webhook.dto.Emoji;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -30,7 +31,7 @@ public class WebHookConfig {
     /**
      * 企业微信机器人 配置
      */
-    private WeChatConfig wechat;
+    private Map<String, WeChatConfig> wechat;
     /**
      * 飞书机器人 配置
      */
@@ -45,11 +46,11 @@ public class WebHookConfig {
         this.ding = ding;
     }
 
-    public WeChatConfig getWechat() {
-        return wechat;
+    public WeChatConfig getWechat(String projectName) {
+        return wechat.get(projectName);
     }
 
-    public void setWechat(WeChatConfig wechat) {
+    public void setWechat(Map<String, WeChatConfig> wechat) {
         this.wechat = wechat;
     }
 

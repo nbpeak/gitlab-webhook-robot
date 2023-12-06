@@ -52,7 +52,7 @@ public class NoteHook implements MarkDownMsg {
 
     @Override
     public String getMarkdown() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(new Emoji("\uD83D\uDCDD ").toString());
         String u = String.format("[%s](%s)", user.getName(), UserUtils.getUserHomePage(project.getWebUrl(), user.getUsername()));
 
         String p = String.format("[[%s]](%s)", project.getName(), project.getWebUrl());

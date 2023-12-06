@@ -3,24 +3,27 @@ package io.github.ealenxie.gitlab.webhook.sender;
 import io.github.ealenxie.gitlab.GitlabHandler;
 import io.github.ealenxie.gitlab.webhook.conf.WebHookConfig;
 import io.github.ealenxie.gitlab.webhook.dto.MarkDownMsg;
+import io.github.ealenxie.gitlab.webhook.dto.Project;
 import io.github.ealenxie.wechat.WeChatClient;
 import io.github.ealenxie.wechat.dto.Markdown;
 import io.github.ealenxie.wechat.message.MarkdownMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  * Created by EalenXie on 2022/2/11 16:42
  */
+@Slf4j
 @Component
 @ConditionalOnProperty(prefix = WebHookConfig.PREFIX, value = "way", havingValue = "wechat")
 public class WeChatMessageSender implements MessageSender<MarkDownMsg, String> {
@@ -53,30 +56,33 @@ public class WeChatMessageSender implements MessageSender<MarkDownMsg, String> {
             atMobiles.addAll(markDownMsg.notifier());
             markdown.setMentionedMobileList(atMobiles.toArray(new String[0]));
         }
-        sb.append(markDownMsg.getMarkdown());
+        String msg = markDownMsg.getMarkdown();
+        if (StringUtils.isEmpty(msg)) {
+            return ResponseEntity.ok().build();
+        }
+        sb.append(msg);
+        log.info("消息内容：{}", sb);
         markdown.setContent(sb.toString());
         MarkdownMessage actionCardMessage = new MarkdownMessage(markdown);
-        return weChatClient.sendMessage(actionCardMessage, getKey(markDownMsg.getMessageType()));
+        return weChatClient.sendMessage(actionCardMessage, getKey(markDownMsg.getProject(), markDownMsg.getMessageType()));
     }
 
-    private String getKey(MessageTypeEnum messageType) {
-        Supplier<String> keyFunc = () -> {
-            if (messageType == null) {
-                return null;
-            }
+    private String getKey(Project project, MessageTypeEnum messageType) {
+        return Optional.ofNullable(webHookConfig.getWechat(project.getName()))
+                .map(config -> {
+                    String key = null;
+                    if (MessageTypeEnum.COMMENT == messageType) {
+                        key = config.getCommentKey();
+                    } else if (MessageTypeEnum.MERGE_REQUEST_STATUS_CHANGED == messageType) {
+                        key = config.getMergeRequestStatusChangedKey();
+                    }
 
-            switch (messageType) {
-                case COMMENT:
-                    return webHookConfig.getWechat().getCommentKey();
-                case MERGE_REQUEST_STATUS_CHANGED:
-                    return webHookConfig.getWechat().getMergeRequestStatusChangedKey();
-                default:
-                    return webHookConfig.getWechat().getKey();
-            }
-        };
-
-        return Optional.ofNullable(keyFunc.get())
-                .orElse(webHookConfig.getWechat().getKey());
+                    if (key == null || key.isEmpty()) {
+                        key = config.getKey();
+                    }
+                    return key;
+                })
+                .orElse(null);
     }
 
 }
